@@ -7,10 +7,12 @@ from .models import Feed, Post, Comment, Like
 from .serializers import PostSerializers, CommentSerializers
 
 from rest_framework import viewsets, mixins
+from rest_framework.permissions import IsAuthenticated
 
 class PostCreateViewset(mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializers
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         if hasattr(self.request.user,'feed_author'):
@@ -20,3 +22,4 @@ class PostCreateViewset(mixins.CreateModelMixin, mixins.ListModelMixin, viewsets
         else:
             raise serializer.ValidationError("feed not matched.")
 
+ 
