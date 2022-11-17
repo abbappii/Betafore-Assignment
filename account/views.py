@@ -1,3 +1,121 @@
 from django.shortcuts import render
 
-# Create your views here.
+from .models import User
+from .serializers import LoginSerializerUser, UserRegisterSerializers, OtpVerifySerializers
+
+from rest_framework.response import Response
+
+from rest_framework import generics
+from django.db.models import Q
+from django.contrib.auth import authenticate
+from rest_framework import status
+from django.contrib.auth.hashers import make_password
+
+
+# This class used to register a user 
+class UserRegisterView(generics.GenericAPIView):
+    serializer_class = UserRegisterSerializers
+
+    def post(self,request, *args, **kwargs):
+        
+        serializer = UserRegisterSerializers(data=request.data)
+        if serializer.is_valid():
+            """
+                serializer will check
+                    -unique email
+                    -validated user will be saved
+            """
+
+            email = serializer.validated_data['email']
+            username = serializer.validated_data['username']
+            password = serializer.validated_data['password']
+            # confirm_password = serializer.validated_data['confirm_password']
+
+
+            if User.objects.filter(email=email).exists():
+                return Response({'Error':'Email Already in Used.'},
+                    status=status.HTTP_406_NOT_ACCEPTABLE
+                    )
+                   
+            # elif password != confirm_password:
+            #     return Response({'Error':"Password didn't mathched."},
+            #     status=status.HTTP_406_NOT_ACCEPTABLE
+            #     )
+            
+            else:
+                authinfo = {
+                    'username': username,
+                    'email':email,
+                    'password':make_password(password)
+                }
+                user =User(**authinfo)
+                user.save()
+            
+            return Response({"Success":"User Created Successfully."},
+                status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors)
+
+
+
+
+# user login view 
+import random
+class UserLoginOtpSendView(generics.GenericAPIView):
+    serializer_class = LoginSerializerUser
+
+    def post(self, request, *args, **kwargs):
+        get_email  = request.data['email']
+        password = request.data['password']
+        print('get_email:',get_email)
+        print('password:', password)
+
+        get_user = User.objects.filter(email=get_email).first()
+
+        if get_user:
+            otp = random.randint(111111,999999)
+            get_user.otp = otp 
+            get_user.save()
+
+            return Response({
+                'OK':'Email found',
+                'user_id': get_user.id
+            })
+
+        else:
+            return Response(
+                {'Error':'No such User Found'},
+                status=status.HTTP_204_NO_CONTENT)
+
+class UserLoginOtpVerifyView(generics.GenericAPIView):
+    serializer_class = OtpVerifySerializers
+
+    def post(self,request):
+        user_id = request.data['user_id']
+        get_otp = request.data['otp']
+
+        user = User.objects.filter(id=user_id).first()
+
+        if user:
+            if user.otp == get_otp:
+                user_auth = authenticate(user)
+                if user_auth:
+                    return Response({
+                        'id': user_auth.id,
+                        'username': user_auth.username,
+                        'email': user_auth.email,
+                    })
+                else:
+                    return Response({
+                        'Error':'Invalid credentials username or password didnt matched.'},
+                        status=status.HTTP_406_NOT_ACCEPTABLE
+                    )
+            else:
+                return Response({
+                    'otp':'otp didnot matched'
+                })
+        else:
+            return Response(
+                {'Error':'No such User Found'},
+                status=status.HTTP_204_NO_CONTENT)
+        
