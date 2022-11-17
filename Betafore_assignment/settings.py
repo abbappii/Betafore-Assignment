@@ -31,7 +31,9 @@ INSTALLED_APPS = [
 
     # installed apps 
     'account.apps.AccountConfig',
-
+    'feed.apps.FeedConfig',
+    'friend.apps.FriendConfig',
+    
     # third party apps 
     'rest_framework',
     'rest_framework_simplejwt',
