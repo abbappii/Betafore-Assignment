@@ -23,6 +23,9 @@ from rest_framework_simplejwt.views import (
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('account/',include('account.urls')),
+    path('feed/',include('feed.urls')),
+    path('friend/',include('friend.urls')),
 
     # simple-jwt(webtoken)
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
