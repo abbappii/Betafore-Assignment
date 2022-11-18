@@ -1,7 +1,7 @@
 from django.shortcuts import render
 
 from .models import User
-from .serializers import LoginSerializerUser, UserRegisterSerializers, OtpVerifySerializers
+from .serializers import LoginSerializerUser, UserListSerializers, UserRegisterSerializers, OtpVerifySerializers
 
 from rest_framework.response import Response
 
@@ -10,7 +10,8 @@ from django.db.models import Q
 from django.contrib.auth import authenticate
 from rest_framework import status
 from django.contrib.auth.hashers import make_password
-
+from django.db.models import Q 
+from rest_framework.views import APIView
 from feed.models import Feed
 
 # This class used to register a user 
@@ -131,3 +132,26 @@ class UserLoginOtpVerifyView(generics.GenericAPIView):
                 {'Error':'No such User Found'},
                 status=status.HTTP_204_NO_CONTENT)
         
+
+# search people 
+
+class PeopleSearch(APIView):
+
+    def get(self,request,*args, **kwargs):
+        query = self.request.query_params.get('query')
+        
+        if query == None:
+            query = ''
+
+        if query:
+            data = User.objects.filter(
+                Q(username__icontains=query) |
+                Q(email__icontains=query)
+            )
+        
+        else:
+            data = User.objects.none()
+
+        seriallizer = UserListSerializers(data, many=True)
+        return Response(seriallizer.data)
+

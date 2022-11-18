@@ -22,3 +22,9 @@ class OtpVerifySerializers(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['user_id','otp']
+
+class UserListSerializers(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        exclude = ['password','otp','is_admin','is_staff','is_superuser']
