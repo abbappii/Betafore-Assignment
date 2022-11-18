@@ -11,6 +11,7 @@ from django.contrib.auth import authenticate
 from rest_framework import status
 from django.contrib.auth.hashers import make_password
 
+from feed.models import Feed
 
 # This class used to register a user 
 class UserRegisterView(generics.GenericAPIView):
@@ -50,9 +51,20 @@ class UserRegisterView(generics.GenericAPIView):
                 }
                 user =User(**authinfo)
                 user.save()
+
+                feed_auth = User.objects.filter(email=email).first()
+                print('feed auth:',feed_auth)
+
+                feedInfo = {
+                    'author': feed_auth,
+                    'slug': f'{feed_auth.username}-slug'
+                }
+                feed = Feed(**feedInfo)
+                feed.save()
+                print('feed from db:',Feed.objects.get(author=feed.author))
             
-            return Response({"Success":"User Created Successfully."},
-                status=status.HTTP_201_CREATED)
+                return Response({"Success":"User Created Successfully."},
+                    status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors)
 
