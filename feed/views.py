@@ -75,3 +75,31 @@ class Like_View(APIView):
         else:
             return Response({'msg':'yon can not like this post.To like this post you become friends with post author.'})
         
+class CommentView(APIView):
+
+    def post(self,request, *args, **kwargs):
+        # user = request.user
+        user = User.objects.get(id=4)
+
+        post_id = self.request.query_params.get('post_id')
+        post = Post.objects.filter(id=post_id).first()
+
+        # get request users frind list 
+        friend_list = FriendList.objects.get(user=user)
+        
+        friends = friend_list.friends.all()
+        '''
+            if post author in reqeust.user frined list -> 
+                - can comment on this post 
+        '''
+        if post.author in friends:
+            data = request.data
+            serializer = CommentSerializers(data=data)
+            if serializer.is_valid():
+                serializer.save(post=post,author=user)
+                return Response(serializer.data)
+            else:
+                return Response(serializer.errors)
+        else:
+            return Response({'msg':'yon can not comment this post.To like this post you become friends with post author.'})
+

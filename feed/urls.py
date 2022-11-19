@@ -1,6 +1,6 @@
 
 from django.urls import path , include
-from .views import PostCreateViewset, Like_View
+from .views import PostCreateViewset, Like_View, CommentView
 from rest_framework import routers
 
 router = routers.DefaultRouter()
@@ -12,6 +12,7 @@ urlpatterns = [
 
 urlpatterns_l_c = [
     path('post-like/', Like_View.as_view(),name='like'),
+    path('post-comment/',CommentView.as_view(),name='comment'),
 
 ]
 
