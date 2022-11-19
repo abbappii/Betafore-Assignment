@@ -44,6 +44,8 @@ class FriendRequests(Initials):
         return self.sender.username
 
     def accept(self):
+        print('self in model accept:',self)
+        
         receiver_friend_list = FriendList.objects.get(user=self.receiver)
         if receiver_friend_list:
             receiver_friend_list.add_friend(self.sender)

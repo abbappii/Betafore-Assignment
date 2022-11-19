@@ -13,6 +13,7 @@ from django.contrib.auth.hashers import make_password
 from django.db.models import Q 
 from rest_framework.views import APIView
 from feed.models import Feed
+from friend.models import FriendList
 
 # This class used to register a user 
 class UserRegisterView(generics.GenericAPIView):
@@ -53,6 +54,7 @@ class UserRegisterView(generics.GenericAPIView):
                 user =User(**authinfo)
                 user.save()
 
+                # feed save with register user 
                 feed_auth = User.objects.filter(email=email).first()
                 print('feed auth:',feed_auth)
 
@@ -63,7 +65,15 @@ class UserRegisterView(generics.GenericAPIView):
                 feed = Feed(**feedInfo)
                 feed.save()
                 print('feed from db:',Feed.objects.get(author=feed.author))
-            
+
+                # friend list create with register user email 
+                friendList_auth = User.objects.get(email=email)
+                friendListInfo = {
+                    'user': friendList_auth
+                }
+                friendLIst = FriendList(**friendListInfo)
+                friendLIst.save()
+
                 return Response({"Success":"User Created Successfully."},
                     status=status.HTTP_201_CREATED)
         else:
