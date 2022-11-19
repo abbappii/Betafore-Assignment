@@ -24,7 +24,7 @@ class Friend_list_view(APIView):
         try:
             friend_list = FriendList.objects.get(user=this_user)
         except:
-            return Response({'error:':'Friend list query does not exist'})
+            return Response({'error':'Friend list query does not exist'})
         try:
             if request.user != this_user:
                 if not request.user in friend_list.friends.all():
@@ -41,7 +41,7 @@ class Friend_list_view(APIView):
             })
         
         except:
-            return Response({'Error:':'Friend list does not exist.'})
+            return Response({'Error':'Friend list does not exist.'})
 '''
     Logic here to send a friend request to an user if they are not friends
 '''     
