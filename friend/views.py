@@ -19,12 +19,12 @@ class Friend_list_view(APIView):
         try:
             this_user = User.objects.get(pk=user_id)
         except User.DoesNotExist:
-            return Response({'user:','user is not exist.'})
+            return Response({'user':'user is not exist.'})
         
         try:
             friend_list = FriendList.objects.get(user=this_user)
         except:
-            return Response({'error:','Friend list query does not exist'})
+            return Response({'error:':'Friend list query does not exist'})
         try:
             if request.user != this_user:
                 if not request.user in friend_list.friends.all():
@@ -41,7 +41,7 @@ class Friend_list_view(APIView):
             })
         
         except:
-            return Response({'Error:','Friend list does not exist.'})
+            return Response({'Error:':'Friend list does not exist.'})
 '''
     Logic here to send a friend request to an user if they are not friends
 '''     
@@ -64,13 +64,13 @@ class SendFriendRequests(APIView):
                 # if none are active send a new friend request 
                 friend_request = FriendRequests(sender=user, receiver=receiver)
                 friend_request.save()
-                return Response({'sent:','Friend Request sent successfully.'})
+                return Response({'sent':'Friend Request sent successfully.'})
 
             friend_request = FriendRequests(sender=user,receiver=receiver)
             friend_request.save()
-            return Response({'sent:','Friend Request sent successfully.'})
+            return Response({'sent':'Friend Request sent successfully.'})
                
-        return Response({'error:''Something went wrong'})
+        return Response({'error':'Something went wrong'})
 
     
 # logic accept friend  reqest 
@@ -88,7 +88,7 @@ class Accept_frined_request(APIView):
                 friend_request = FriendRequests.get(id=friend_reqeust_id)
                 # print('friend req:',friend_request)
             except:
-                return Response({'msg:','friend request not foud error.'})
+                return Response({'msg':'friend request not foud error.'})
 
             if friend_request.receiver == user:
                 # print('frnd re receiver:', friend_request.receiver)
@@ -96,9 +96,9 @@ class Accept_frined_request(APIView):
 
                 if friend_request:
                     friend_request.accept()
-                return Response({"response:","Friend request accept successfullly."})
+                return Response({"response":"Friend request accept successfullly."})
             else:
-                return Response({"Error:","No such friend request"})
+                return Response({"Error":"No such friend request"})
         else:
-            return Response({"Error:","unable to accept a friend request"})
+            return Response({"Error":"unable to accept a friend request"})
 
