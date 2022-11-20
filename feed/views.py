@@ -15,12 +15,78 @@ class PostCreateViewset(mixins.CreateModelMixin, mixins.ListModelMixin, viewsets
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        if hasattr(self.request.user,'feed_author'):
-            serializer.save(author=self.request.user.feed_user,feed=self.request.user)
-        elif self.request.user:
-            serializer.save(author=self.request.user, feed = self.request.data['feed_id'])
+        # user = self.request.user
+        # user = User.objects.get(id=4)
+        data = self.request.data
+        print('user name:',user)
+        print('req data:',self.request.data)
+
+        if 'feed' not in data:
+            user = User.objects.get(id=3)
+            print('user name:',user)
+            print('hasattr save')
+            serializer = PostSerializers(data=self.request.data)
+            if serializer.is_valid():
+                serializer.save(author=user,feed=user.feed_author)
+
+        elif 'feed' in data:
+            print('else case')
+            user = User.objects.get(id=3)
+            print('user name:',user)
+
+            feed_id = self.request.data['feed']
+            feed = Feed.objects.get(id=feed_id)
+
+            # check friend list for friend post
+            friend_list = FriendList.objects.get(user=user)     
+            friends = friend_list.friends.all()
+
+            if feed.author in friends:
+                serializer = PostSerializers(data=self.request.data)
+                if serializer.is_valid():
+                    serializer.save(author=user, feed = feed)
+        raise serializer.ValidationError("feed or user not matched to post on timeline.")
+
+class PostOnTimeLineView(generics.GenericAPIView):
+    queryset =  Post.objects.all()
+    serializer_class = PostSerializers
+    permission_classes = [IsAuthenticated]
+
+    def post(self,request,*args,**kwargs):
+        data = request.data
+        
+        # if hasattr(user,'feed_author'):
+        # if request.data['feed'] not in data:
+        if 'feed' not in data:
+            user = User.objects.get(id=3)
+            print('user name:',user)
+            print('hasattr save')
+            serializer = PostSerializers(data=request.data)
+            if serializer.is_valid():
+                serializer.save(author=user,feed=user.feed_author)
+                return Response(serializer.data)
+            return Response(serializer.errors)
+
         else:
-            raise serializer.ValidationError("feed not matched.")
+            print('else case')
+            user = User.objects.get(id=3)
+            print('user name:',user)
+
+            feed_id = request.data['feed']
+            feed = Feed.objects.get(id=feed_id)
+
+            # check friend list for friend post
+            friend_list = FriendList.objects.get(user=user)     
+            friends = friend_list.friends.all()
+
+            if feed.author in friends:
+                serializer = PostSerializers(data=request.data)
+                if serializer.is_valid():
+                    serializer.save(author=user, feed = feed)
+                    print('hello')
+                    return Response(serializer.data)
+                return Response(serializer.errors)
+            return Response({'msg':'has no permission to post on someones timeline without become a friend.'})
 
  
 '''
@@ -42,32 +108,21 @@ class Like_View(APIView):
 
         post_id = self.request.query_params.get('post_id')
         post = Post.objects.filter(id=post_id).first()
-        if post:
-            print('post user:',post.author)
-        else:
-            print('no post found')
         
         # get request users frind list 
-        friend_list = FriendList.objects.get(user=user)
-        print('frined list of post author:',friend_list)
-        
+        friend_list = FriendList.objects.get(user=user)     
         friends = friend_list.friends.all()
-        print('all friends :', friends)
-        for i in friends:
-            print(i.friend_list_user)
-
         '''
             if post author in reqeust users frined list -> 
-               
                 - can like the post and dislike 
         '''
         post_by_user = post.author
-        print('post by author:',post_by_user)
 
+        liked = True
         if post_by_user in friends:
             already_liked = Like.objects.filter(liker=user,post=post)
             if already_liked:
-                return Response({'liked':'True'})
+                return Response({'liked':liked})
             if not already_liked:
                 liked_post = Like(liker=user,post=post)
                 liked_post.save()
@@ -75,6 +130,10 @@ class Like_View(APIView):
         else:
             return Response({'msg':'yon can not like this post.To like this post you become friends with post author.'})
         
+
+'''
+comment logics if friends post then comment on a post
+'''
 class CommentView(APIView):
 
     def post(self,request, *args, **kwargs):
@@ -103,3 +162,22 @@ class CommentView(APIView):
         else:
             return Response({'msg':'yon can not comment this post.To like this post you become friends with post author.'})
 
+
+# like withdraw logics 
+class Withdraw_like_view(APIView):
+
+    def get(self,request,*args, **kwargs):
+        # user = request.user
+        user = User.objects.get(id=4)
+
+        post_id = self.request.query_params.get('post_id')
+        post = Post.objects.filter(id=post_id).first()
+
+        already_liked = Like.objects.filter(liker=user,post=post)
+        if already_liked:
+            liked = True
+            already_liked.delete()
+            return Response({'msg':'withdraw like successfully.','liked':liked})
+        else:
+            liked = False
+            return Response({'Error':'No like found','liked': liked})
