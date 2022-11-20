@@ -107,10 +107,11 @@ from rest_framework.views import APIView
 from account.models import User
 
 class Like_View(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get(self,request,*args, **kwargs):
-        # user = request.user
-        user = User.objects.get(id=4)
+        user = request.user
+        # user = User.objects.get(id=4)
 
         post_id = self.request.query_params.get('post_id')
         post = Post.objects.filter(id=post_id).first()
@@ -141,10 +142,11 @@ class Like_View(APIView):
 comment logics if friends post then comment on a post
 '''
 class CommentView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def post(self,request, *args, **kwargs):
-        # user = request.user
-        user = User.objects.get(id=4)
+        user = request.user
+        # user = User.objects.get(id=4)
 
         post_id = self.request.query_params.get('post_id')
         post = Post.objects.filter(id=post_id).first()
@@ -171,10 +173,11 @@ class CommentView(APIView):
 
 # like withdraw logics 
 class Withdraw_like_view(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get(self,request,*args, **kwargs):
-        # user = request.user
-        user = User.objects.get(id=4)
+        user = request.user
+        # user = User.objects.get(id=4)
 
         post_id = self.request.query_params.get('post_id')
         post = Post.objects.filter(id=post_id).first()

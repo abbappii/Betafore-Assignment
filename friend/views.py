@@ -7,12 +7,14 @@ from rest_framework.views import APIView
 from rest_framework import status
 
 from account.models import User
+from rest_framework.permissions import IsAuthenticated
 
 '''
     Logic of this view
         - see friend list if friends 
 '''
 class Friend_list_view(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get(self,request, *args, **kwargs):
         user_id = self.request.query_params.get('user_id')
@@ -43,6 +45,7 @@ class Friend_list_view(APIView):
     Logic here to send a friend request to an user if they are not friends
 '''     
 class SendFriendRequests(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get(self,request, *args, **kwargs):
         user = request.user
@@ -79,6 +82,7 @@ class SendFriendRequests(APIView):
     Accept friend reqeusts 
 '''
 class Accept_frined_request(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get(self,request,*args, **kwargs):
         user = request.user

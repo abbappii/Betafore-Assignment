@@ -14,6 +14,7 @@ from django.db.models import Q
 from rest_framework.views import APIView
 from feed.models import Feed
 from friend.models import FriendList
+import random
 
 # This class used to register a user 
 class UserRegisterView(generics.GenericAPIView):
@@ -83,7 +84,7 @@ class UserRegisterView(generics.GenericAPIView):
 
 
 # user login view 
-import random
+
 class UserLoginOtpSendView(generics.GenericAPIView):
     serializer_class = LoginSerializerUser
 
@@ -92,6 +93,7 @@ class UserLoginOtpSendView(generics.GenericAPIView):
         password = request.data['password']
 
         get_user = User.objects.filter(email=get_email).first()
+
         if get_user:
             authenticate(email=get_email,password=password)
 
@@ -104,7 +106,7 @@ class UserLoginOtpSendView(generics.GenericAPIView):
             return Response({
                 'OK':'Email found',
                 'user_id': get_user.id, 
-                'otp': get_user.otp   #grab otp from db
+                'otp': get_user.otp     #grab otp from db
             })
 
         else:
@@ -112,6 +114,10 @@ class UserLoginOtpSendView(generics.GenericAPIView):
                 {'Error':'No such User Found'},
                 status=status.HTTP_204_NO_CONTENT)
 
+
+'''
+logic user login verify otp and if otp matched login this user 
+'''
 class UserLoginOtpVerifyView(generics.GenericAPIView):
     serializer_class = OtpVerifySerializers
 
@@ -149,7 +155,11 @@ class UserLoginOtpVerifyView(generics.GenericAPIView):
         
 
 # search people 
-
+'''
+    search people 
+        - get search people query from query params 
+        - provide query like  /?query='your query people name or email' 
+'''
 class PeopleSearch(APIView):
 
     def get(self,request,*args, **kwargs):
