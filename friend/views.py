@@ -36,18 +36,25 @@ class Friend_list_view(APIView):
         
         except:
             return Response({'Error':'Friend list does not exist.'})
+
+
+
 '''
     Logic here to send a friend request to an user if they are not friends
 '''     
 class SendFriendRequests(APIView):
 
     def get(self,request, *args, **kwargs):
-        user = User.objects.get(id=3)  #request.user
+        user = request.user
+        # user = User.objects.get(id=3) 
         receiver_user_id = self.request.query_params.get('id')
 
         if receiver_user_id:
-            receiver = User.objects.get(id=receiver_user_id)
-        
+            try:
+                receiver = User.objects.get(id=receiver_user_id)
+            except:
+                return Response('receiver user:','receiver user does not exist.')
+
             friend_requests = FriendRequests.objects.filter(
                 sender=user,receiver=receiver
             )
@@ -67,7 +74,10 @@ class SendFriendRequests(APIView):
         return Response({'error':'Something went wrong'})
 
     
-# logic accept friend  reqest 
+
+'''
+    Accept friend reqeusts 
+'''
 class Accept_frined_request(APIView):
 
     def get(self,request,*args, **kwargs):
@@ -90,7 +100,7 @@ class Accept_frined_request(APIView):
 
                 if friend_request:
                     friend_request.accept()
-                return Response({"response":"Friend request accept successfullly."})
+                    return Response({"response":"Friend request accept successfullly."})
             else:
                 return Response({"Error":"No such friend request"})
         else:
