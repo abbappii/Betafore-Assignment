@@ -7,7 +7,7 @@ from rest_framework.response import Response
 
 from rest_framework import generics
 from django.db.models import Q
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from rest_framework import status
 from django.contrib.auth.hashers import make_password
 from django.db.models import Q 
@@ -179,4 +179,5 @@ class PeopleSearch(APIView):
 
         seriallizer = UserListSerializers(data, many=True)
         return Response(seriallizer.data)
+
 

@@ -93,7 +93,7 @@ class Accept_frined_request(APIView):
 
         if friend_reqeust_id:
             try:
-                friend_request = FriendRequests.get(id=friend_reqeust_id)
+                friend_request = FriendRequests.objects.get(id=friend_reqeust_id)
                 # print('friend req:',friend_request)
             except:
                 return Response({'msg':'friend request not foud error.'})
@@ -110,3 +110,33 @@ class Accept_frined_request(APIView):
         else:
             return Response({"Error":"unable to accept a friend request"})
 
+
+'''
+    deline a friend request
+'''
+class DeclineFriendRequestView(APIView):
+    def get(self,request,*args,**kwargs):
+        # user = request.user
+        user = User.objects.get(id=2)
+        print('user:',user)
+
+        friend_reqeust_id = self.request.query_params.get('friend_req_id')
+        print('frnd req id:',friend_reqeust_id)
+
+        if friend_reqeust_id:
+            try:
+                print('hello')
+                friend_request = FriendRequests.objects.get(id=friend_reqeust_id)
+                print('friend req:',friend_request)
+            except:
+                return Response({'msg':'friend request not foud error.'})
+
+            if friend_request.receiver == user:
+                if friend_request:
+                    friend_request.decline()
+                    return Response({"response":"Friend request decline successfullly."})
+            else:
+                return Response({"Error":"No such friend request"})
+        else:
+            return Response({"Error":"unable to declne a friend request"})
+ 
