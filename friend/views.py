@@ -28,16 +28,16 @@ class Friend_list_view(APIView):
             friend_list = FriendList.objects.get(user=this_user)
         except:
             return Response({'error':'Friend list query does not exist'})
-        try:
-            if request.user != this_user:
-                if not request.user in friend_list.friends.all():
-                    return Response({'msg':'You must be friends to view frined list.'})
+        # try:
+        #     if request.user != this_user:
+        #         if not request.user in friend_list.friends.all():
+        #             return Response({'msg':'You must be friends to view frined list.'})
                         
-            friends = friend_list.friends.all().values()
-            return Response(friends)
+        friends = friend_list.friends.all().values()
+        return Response(friends)
         
-        except:
-            return Response({'Error':'Friend list does not exist.'})
+        # except:
+        #     return Response({'Error':'Friend list does not exist.'})
 
 
 
