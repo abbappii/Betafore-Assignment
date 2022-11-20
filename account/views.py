@@ -7,7 +7,7 @@ from rest_framework.response import Response
 
 from rest_framework import generics
 from django.db.models import Q
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login
 from rest_framework import status
 from django.contrib.auth.hashers import make_password
 from django.db.models import Q 
@@ -90,19 +90,21 @@ class UserLoginOtpSendView(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         get_email  = request.data['email']
         password = request.data['password']
-        print('get_email:',get_email)
-        print('password:', password)
 
         get_user = User.objects.filter(email=get_email).first()
+        if get_user:
+            authenticate(email=get_email,password=password)
 
         if get_user:
             otp = random.randint(111111,999999)
             get_user.otp = otp 
             get_user.save()
 
+            # print('otp:',get_user.otp)
             return Response({
                 'OK':'Email found',
-                'user_id': get_user.id
+                'user_id': get_user.id, 
+                'otp': get_user.otp   #grab otp from db
             })
 
         else:
@@ -121,12 +123,15 @@ class UserLoginOtpVerifyView(generics.GenericAPIView):
 
         if user:
             if user.otp == get_otp:
-                user_auth = authenticate(user)
-                if user_auth:
+                # print('user:',user)
+
+                if user:
+                    login(request,user)
                     return Response({
-                        'id': user_auth.id,
-                        'username': user_auth.username,
-                        'email': user_auth.email,
+                        'id': user.id,
+                        'username': user.username,
+                        'email': user.email,
+                        'success': 'login successfully.'
                     })
                 else:
                     return Response({
