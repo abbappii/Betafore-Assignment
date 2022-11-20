@@ -16,6 +16,7 @@ class Friend_list_view(APIView):
 
     def get(self,request, *args, **kwargs):
         user_id = self.request.query_params.get('user_id')
+        # user_2= User.objects.get(id=2)
         try:
             this_user = User.objects.get(pk=user_id)
         except User.DoesNotExist:
@@ -29,16 +30,9 @@ class Friend_list_view(APIView):
             if request.user != this_user:
                 if not request.user in friend_list.friends.all():
                     return Response({'msg':'You must be friends to view frined list.'})
-            
-            friends = []
-            auth_user_friend_list =FriendList.objects.get(user=request.user)
-
-            for friend in friend_list.friends.all():
-                friends.append((friends, auth_user_friend_list.is_mutual_friend(friend)))
-
-            return Response({
-                'friends':friends
-            })
+                        
+            friends = friend_list.friends.all().values()
+            return Response(friends)
         
         except:
             return Response({'Error':'Friend list does not exist.'})
