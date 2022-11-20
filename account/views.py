@@ -181,3 +181,19 @@ class PeopleSearch(APIView):
         return Response(seriallizer.data)
 
 
+# logout view 
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
+
+class Logout_View(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self,request,*args,**kwargs):
+        token = RefreshToken.for_user(self.request.user)
+        try:
+            token.blacklist()
+            print('tkn:',token)
+        except:
+            pass
+        
+        logout(request)
+        return Response({'msg':'logout successfully'})
