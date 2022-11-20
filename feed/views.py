@@ -9,28 +9,35 @@ from .serializers import PostSerializers, CommentSerializers
 from rest_framework import viewsets, mixins
 from rest_framework.permissions import IsAuthenticated
 
+'''
+    Logic here to create a post
+        - login(authenticate credentials will must provide)
+        - user can post his own timeline
+        - user has permission to post on friends timeline
+            -must become friends
+'''
+
+# post create using viewset with override perform create method/function 
 class PostCreateViewset(mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializers
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        # user = self.request.user
-        # user = User.objects.get(id=4)
         data = self.request.data
-        print('user name:',user)
+        # print('user name:',user)
         print('req data:',self.request.data)
 
         if 'feed' not in data:
-            user = User.objects.get(id=3)
+            user = self.request.user
+            # user = User.objects.get(id=3)  // only for check  
             print('user name:',user)
-            print('hasattr save')
+
             serializer = PostSerializers(data=self.request.data)
             if serializer.is_valid():
                 serializer.save(author=user,feed=user.feed_author)
 
         elif 'feed' in data:
-            print('else case')
             user = User.objects.get(id=3)
             print('user name:',user)
 
@@ -45,8 +52,12 @@ class PostCreateViewset(mixins.CreateModelMixin, mixins.ListModelMixin, viewsets
                 serializer = PostSerializers(data=self.request.data)
                 if serializer.is_valid():
                     serializer.save(author=user, feed = feed)
-        raise serializer.ValidationError("feed or user not matched to post on timeline.")
 
+        else:
+            raise serializer.ValidationError("feed or user not matched to post on timeline.")
+
+
+# same logic as viewset, create post on ownself timeline and friends timeline 
 class PostOnTimeLineView(generics.GenericAPIView):
     queryset =  Post.objects.all()
     serializer_class = PostSerializers
@@ -55,12 +66,9 @@ class PostOnTimeLineView(generics.GenericAPIView):
     def post(self,request,*args,**kwargs):
         data = request.data
         
-        # if hasattr(user,'feed_author'):
-        # if request.data['feed'] not in data:
         if 'feed' not in data:
             user = User.objects.get(id=3)
             print('user name:',user)
-            print('hasattr save')
             serializer = PostSerializers(data=request.data)
             if serializer.is_valid():
                 serializer.save(author=user,feed=user.feed_author)
@@ -68,9 +76,8 @@ class PostOnTimeLineView(generics.GenericAPIView):
             return Response(serializer.errors)
 
         else:
-            print('else case')
-            user = User.objects.get(id=3)
-            print('user name:',user)
+            user = request.user
+            # user = User.objects.get(id=3)
 
             feed_id = request.data['feed']
             feed = Feed.objects.get(id=feed_id)
@@ -83,7 +90,6 @@ class PostOnTimeLineView(generics.GenericAPIView):
                 serializer = PostSerializers(data=request.data)
                 if serializer.is_valid():
                     serializer.save(author=user, feed = feed)
-                    print('hello')
                     return Response(serializer.data)
                 return Response(serializer.errors)
             return Response({'msg':'has no permission to post on someones timeline without become a friend.'})
