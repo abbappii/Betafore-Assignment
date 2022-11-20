@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     # third party apps 
     'rest_framework',
     'rest_framework_simplejwt',
+    'drf_yasg',
 
 ]
 
@@ -45,6 +46,19 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
+}
+
+# swagger settings 
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'basic': {
+            'type': 'basic'
+        }
+    },
+}
+
+REDOC_SETTINGS = {
+   'LAZY_RENDERING': False,
 }
 
 MIDDLEWARE = [
